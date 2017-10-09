@@ -28,8 +28,7 @@ from App.class_init import default__class_init__ as InitializeClass
 from DateTime import DateTime
 
 # LDAPUserFolder package imports
-from Products.LDAPUserFolder.utils import encoding
-from Products.LDAPUserFolder.utils import _verifyUnicode
+from Products.LDAPUserFolder import utils
 
 
 class NonexistingUser:
@@ -49,7 +48,7 @@ class LDAPUser(BasicUser):
     security = ClassSecurityInfo()
     _properties = None
 
-    def __init__( self
+    def __init__(self
                 , uid
                 , name
                 , password
@@ -63,14 +62,14 @@ class LDAPUser(BasicUser):
                 ):
         """ Instantiate a new LDAPUser object """
         self._properties = {}
-        self.id = _verifyUnicode(uid)
-        self.name = _verifyUnicode(name)
+        self.id = utils._verifyUnicode(uid)
+        self.name = utils._verifyUnicode(name)
         self.__ = password
-        self._dn = _verifyUnicode(user_dn)
+        self._dn = utils._verifyUnicode(user_dn)
         self.roles = roles
         self.domains = []
         self._ldap_groups = ldap_groups
-        self.RID = '' 
+        self.RID = ''
         self.groups = ''
         now = time.time()
         self._created = now
@@ -81,8 +80,8 @@ class LDAPUser(BasicUser):
             else:
                 prop = user_attrs.get(key, [None])[0]
 
-            if isinstance(prop, str) and key != 'objectGUID':
-                prop = _verifyUnicode(prop)
+            if isinstance(prop, str) and key.lower() not in utils.BINARY_ATTRIBUTES:
+                prop = utils._verifyUnicode(prop)
 
             self._properties[key] = prop
 
@@ -98,7 +97,7 @@ class LDAPUser(BasicUser):
     security.declarePublic('getId')
     def getId(self):
         if isinstance(self.id, unicode):
-            return self.id.encode(encoding)
+            return self.id.encode(utils.encoding)
 
         return self.id
 
@@ -116,7 +115,7 @@ class LDAPUser(BasicUser):
     def getUserName(self):
         """ Get the name associated with this user """
         if isinstance(self.name, unicode):
-            return self.name.encode(encoding)
+            return self.name.encode(utils.encoding)
 
         return self.name
 
@@ -207,7 +206,7 @@ class LDAPUser(BasicUser):
             prop = my_props.get(name)
 
             if isinstance(prop, unicode):
-                prop = prop.encode(encoding)
+                prop = prop.encode(utils.encoding)
 
             return prop
 
@@ -217,14 +216,14 @@ class LDAPUser(BasicUser):
 
     security.declareProtected(access_contents_information, 'getProperty')
     def getProperty(self, prop_name, default=''):
-        """ 
+        """
             Return the user property referred to by prop_name,
             if the attribute is indeed public.
         """
         prop = self._properties.get(prop_name, default)
         if isinstance(prop, unicode):
-            prop = prop.encode(encoding)
-            
+            prop = prop.encode(utils.encoding)
+
         return prop
 
 
@@ -232,7 +231,7 @@ class LDAPUser(BasicUser):
     def getUserDN(self):
         """ Return the user's full Distinguished Name """
         if isinstance(self._dn, unicode):
-            return self._dn.encode(encoding)
+            return self._dn.encode(utils.encoding)
 
         return self._dn
 
@@ -245,6 +244,6 @@ class LDAPUser(BasicUser):
     def _getLDAPGroups(self):
         """ What groups in LDAP does this user belong to? """
         return tuple(self._ldap_groups)
-    
+
 
 InitializeClass(LDAPUser)
