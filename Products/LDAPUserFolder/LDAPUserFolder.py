@@ -47,6 +47,7 @@ from OFS.SimpleItem import SimpleItem
 from zope.interface import implements
 
 # LDAPUserFolder package imports
+from Products.LDAPUserFolder import utils
 from Products.LDAPUserFolder.interfaces import ILDAPUserFolder
 from Products.LDAPUserFolder.LDAPDelegate import filter_format
 from Products.LDAPUserFolder.LDAPUser import NonexistingUser
@@ -62,6 +63,7 @@ from Products.LDAPUserFolder.utils import GROUP_MEMBER_MAP
 from Products.LDAPUserFolder.utils import guid2string
 from Products.LDAPUserFolder.utils import to_utf8
 from Products.LDAPUserFolder.utils import VALID_GROUP_ATTRIBUTES
+
 
 logger = logging.getLogger('event.LDAPUserFolder')
 _marker = []
@@ -97,9 +99,9 @@ class LDAPUserFolder(BasicUserFolder):
 
     manage_options = (
         (
-        {'label' : 'Configure', 	'action' : 'manage_main',
+        {'label' : 'Configure', 'action' : 'manage_main',
          'help'  : ('LDAPUserFolder', 'Configure.stx')},
-        {'label' : 'LDAP Servers', 	'action' : 'manage_servers',
+        {'label' : 'LDAP Servers', 'action' : 'manage_servers',
          'help'  : ('LDAPUserFolder', 'Servers.stx')},
         {'label' : 'LDAP Schema', 'action' : 'manage_ldapschema',
          'help'  : ('LDAPUserFolder', 'Schema.stx')},
@@ -1169,13 +1171,18 @@ class LDAPUserFolder(BasicUserFolder):
 
                 for key, val in res_dicts[i].items():
                     if len(val) > 0:
-                        rec_dict[key] = val[0]
+                        prop = val[0]
+                        if (isinstance(prop, str) and
+                                key not in utils.BINARY_ATTRIBUTES):
+                            prop = utils._verifyUnicode(prop)
+                        rec_dict[key] = prop
 
                 rec_dict['dn'] = dn
 
                 groups.append(rec_dict)
 
         return groups
+
 
     security.declareProtected(manage_users, 'findUser')
     def findUser(self, search_param, search_term, attrs=(), exact_match=False):
