@@ -60,7 +60,7 @@ VALID_GROUP_ATTRIBUTES = Set([ 'name'
                              , 'mail'
                              ]).union(GROUP_MEMBER_ATTRIBUTES)
 
-encoding = 'latin1'
+encoding = 'utf-8'
 
 
 #################################################
@@ -100,7 +100,7 @@ try:
     encodeLocal, decodeLocal, reader = codecs.lookup(encoding)[:3]
     encodeUTF8, decodeUTF8 = codecs.lookup('UTF-8')[:2]
 
-    if getattr(reader, '__module__', '')  == 'encodings.utf_8':
+    if getattr(reader, '__module__', '') == 'encodings.utf_8':
         # Everything stays UTF-8, so we can make this cheaper
         to_utf8 = from_utf8 = str
 
