@@ -5,8 +5,8 @@ Change log for Products.LDAPUserFolder
 -----------------
 
 - do not unicode encode binary attributes [fRiSi]
-
 - also use utils._verifyUnicode for group attributes [fRiSi]
+- use utf-8 encoding as default [fRiSi]
 
 
 2.27 (2014-04-23)
